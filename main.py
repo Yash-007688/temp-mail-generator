@@ -2,16 +2,31 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for, s
 from temp_mail_generator import TempMailGenerator
 import os
 import hashlib
-from db import init_db, create_user, find_user_by_username, find_user_by_id
+from db import init_db, create_user, find_user_by_username, find_user_by_id, update_user_preferences
 
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key")
+app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-1337-fix")
 init_db()
 
 
-# Single generator instance keeps the selected email/login/domain in memory
-mail = TempMailGenerator()
+def get_mail_instance():
+    """Returns a TempMailGenerator instance restored from session state."""
+    m = TempMailGenerator()
+    m.email = session.get("mail_email")
+    m.login = session.get("mail_login")
+    m.domain = session.get("mail_domain")
+    m.provider = session.get("mail_provider", "1secmail")
+    m.mailtm_token = session.get("mail_token")
+    return m
+
+def save_mail_to_session(m):
+    """Saves TempMailGenerator state back to session."""
+    session["mail_email"] = m.email
+    session["mail_login"] = m.login
+    session["mail_domain"] = m.domain
+    session["mail_provider"] = m.provider
+    session["mail_token"] = m.mailtm_token
 
 
 @app.route("/health", methods=["GET"]) 
@@ -29,6 +44,7 @@ def dashboard():
 
 @app.route("/domains", methods=["GET"]) 
 def domains():
+    mail = get_mail_instance()
     return jsonify({"domains": mail.get_available_domains()})
 
 
@@ -36,7 +52,9 @@ def domains():
 def generate_random():
     data = request.get_json(silent=True) or {}
     length = data.get("length", 10)
+    mail = get_mail_instance()
     email = mail.generate_random_email(length=length)
+    save_mail_to_session(mail)
     return jsonify({"email": email})
 
 
@@ -55,18 +73,25 @@ def generate_custom():
     user = find_user_by_id(int(uid))
     if not user or user["plan"] == "free":
         return jsonify({"error": "₹99 Starter plan or higher required for custom identities"}), 403
+    
+    mail = get_mail_instance()
     email = mail.generate_custom_email(username=username, domain=domain)
+    save_mail_to_session(mail)
     return jsonify({"email": email})
 
 
 @app.route("/inbox", methods=["GET"]) 
 def get_inbox():
+    mail = get_mail_instance()
     inbox = mail.get_inbox()
+    save_mail_to_session(mail) # Provider might have switched
     return jsonify({"email": mail.email, "messages": inbox})
 
 
-@app.route("/read/<int:email_id>", methods=["GET"]) 
-def read_email(email_id: int):
+@app.route("/read/<email_id>", methods=["GET"]) 
+def read_email(email_id):
+    # mail.tm uses string IDs, 1secmail uses ints. Let's keep it flexible.
+    mail = get_mail_instance()
     data = mail.read_email(email_id)
     if not data:
         return jsonify({"error": "email not found or no email selected"}), 404
@@ -78,6 +103,7 @@ def export_inbox():
     data = request.get_json(silent=True) or {}
     output_dir = data.get("output_dir", "inbox")
     os.makedirs(output_dir, exist_ok=True)
+    mail = get_mail_instance()
     files = mail.export_inbox(output_dir)
     return jsonify({
         "saved": len(files),
@@ -137,7 +163,7 @@ def login():
 
 @app.route("/logout", methods=["POST"]) 
 def logout():
-    session.pop("user_id", None)
+    session.clear()
     return jsonify({"ok": True})
 
 
@@ -183,8 +209,12 @@ def update_settings():
     return jsonify({"error": "Failed to update settings"}), 500
 
 
+@app.route("/api", methods=["GET"])
+def api_docs():
+    return render_template("api.html")
+
+
 if __name__ == "__main__":
     # Run the development server: python main.py
     app.run(host="0.0.0.0", port=5000, debug=True)
-
 

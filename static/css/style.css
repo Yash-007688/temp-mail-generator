@@ -166,6 +166,31 @@ body::before {
   box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
 }
 
+.social-icons {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.social-icons a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--glass);
+  border: 1px solid var(--border);
+  color: var(--text-main);
+  transition: all 0.3s ease;
+}
+
+.social-icons a:hover {
+  background: var(--glass-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(99, 102, 241, 0.25);
+}
+
 /* Hero Section */
 .hero {
   text-align: center;

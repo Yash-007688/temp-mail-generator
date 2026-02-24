@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Documentation | Temp Mail</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-left">
+      <a class="brand" href="/">Temp Mail</a>
+      <a class="nav-link" href="/">Home</a>
+      <a class="nav-link" href="/#features">Features</a>
+      <a class="nav-link" href="/#pricing">Pricing</a>
+      <a class="nav-link" href="/api">API Docs</a>
+    </div>
+    <div class="nav-right">
+      <a href="/dashboard" class="nav-btn">Open App</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="hero" style="text-align:left">
+      <div class="hero-title">Developer Guide</div>
+      <h1>Temp Mail API</h1>
+      <p style="color:var(--text-muted); max-width:900px">
+        REST endpoints for registration, authentication, email generation, inbox access, and export.
+        All responses are JSON. Use standard HTTP status codes.
+      </p>
+    </div>
+
+    <section class="section">
+      <h2 style="margin-bottom:1rem">Base URL</h2>
+      <p style="color:var(--text-muted)">Production deployments may vary. Use your Render/Vercel domain.</p>
+      <pre><code>https://&lt;your-domain&gt;/</code></pre>
+    </section>
+
+    <section class="section">
+      <h2 style="margin-bottom:1rem">Authentication</h2>
+      <p style="color:var(--text-muted)">Session-based. Send JSON bodies. Browser clients maintain cookies automatically.</p>
+      <h3 style="margin:1.5rem 0 .75rem">Register</h3>
+      <pre><code>POST /signup
+Body:
+{
+  "username": "alice",
+  "password": "secret123",
+  "plan": "free" | "starter" | "pro" | "enterprise" | "api"
+}
+
+Response 200:
+{ "ok": true, "redirect": "/dashboard" }
+
+Errors:
+400 username and password required
+400 username already exists
+</code></pre>
+
+      <h3 style="margin:1.5rem 0 .75rem">Login</h3>
+      <pre><code>POST /login
+Body:
+{
+  "username": "alice",
+  "password": "secret123"
+}
+
+Response 200:
+{ "ok": true, "redirect": "/dashboard" }
+
+Errors:
+401 invalid credentials
+</code></pre>
+
+      <h3 style="margin:1.5rem 0 .75rem">Logout</h3>
+      <pre><code>POST /logout
+Response 200:
+{ "ok": true }</code></pre>
+
+      <h3 style="margin:1.5rem 0 .75rem">Get Current User</h3>
+      <pre><code>GET /me
+Response 200:
+{
+  "user": {
+    "id": 1,
+    "username": "alice",
+    "plan": "starter",
+    "is_premium": true,
+    "preferences": null
+  }
+}
+
+If not logged in:
+{ "user": null }</code></pre>
+    </section>
+
+    <section class="section">
+      <h2 style="margin-bottom:1rem">Email Generation</h2>
+      <h3 style="margin:1.5rem 0 .75rem">List Domains</h3>
+      <pre><code>GET /domains
+Response 200:
+{ "domains": ["1secmail.com", "mail.tm", "..."] }</code></pre>
+
+      <h3 style="margin:1.5rem 0 .75rem">Generate Random</h3>
+      <pre><code>POST /generate/random
+Body:
+{ "length": 10 }
+
+Response 200:
+{ "email": "abcd1234@1secmail.com" }</code></pre>
+
+      <h3 style="margin:1.5rem 0 .75rem">Generate Custom</h3>
+      <p style="color:var(--text-muted)">Requires login and paid plan.</p>
+      <pre><code>POST /generate/custom
+Body:
+{ "username": "alice", "domain": "mail.tm" }
+
+Response 200:
+{ "email": "alice@mail.tm" }
+
+Errors:
+400 username is required
+401 login required
+403 ₹99 Starter plan or higher required for custom identities</code></pre>
+    </section>
+
+    <section class="section">
+      <h2 style="margin-bottom:1rem">Inbox</h2>
+      <h3 style="margin:1.5rem 0 .75rem">Get Inbox</h3>
+      <pre><code>GET /inbox
+Response 200:
+{
+  "email": "alice@mail.tm",
+  "messages": [
+    { "id": "123", "from": "...", "subject": "...", "date": "..." }
+  ]
+}</code></pre>
+
+      <h3 style="margin:1.5rem 0 .75rem">Read Email</h3>
+      <pre><code>GET /read/&lt;email_id&gt;
+Response 200:
+{ "id": "123", "from": "...", "subject": "...", "body": "..." }
+
+Errors:
+404 email not found or no email selected</code></pre>
+
+      <h3 style="margin:1.5rem 0 .75rem">Export Inbox</h3>
+      <pre><code>POST /export
+Body:
+{ "output_dir": "inbox" }
+
+Response 200:
+{
+  "saved": 3,
+  "files": ["inbox/msg-1.txt", "inbox/msg-2.txt"],
+  "summary": "inbox/inbox_summary.txt"
+}</code></pre>
+    </section>
+
+    <section class="section">
+      <h2 style="margin-bottom:1rem">Settings</h2>
+      <p style="color:var(--text-muted)">Requires login and paid plan.</p>
+      <pre><code>POST /settings
+Body:
+{ "theme": "dark", "notifications": true }
+
+Response 200:
+{ "ok": true, "message": "Settings preserved securely" }
+
+Errors:
+401 login required
+404 user not found
+403 ₹99 Starter plan or higher required to save settings</code></pre>
+    </section>
+
+    <section class="section">
+      <h2 style="margin-bottom:1rem">Utilities</h2>
+      <pre><code>GET /health
+Response 200:
+{ "status": "ok" }</code></pre>
+    </section>
+  </div>
+</body>
+</html>
