@@ -18,8 +18,10 @@
             <a class="nav-link" href="#features">Features</a>
             <a class="nav-link" href="#pricing">Pricing</a>
             <a class="nav-link" href="/api">API Docs</a>
+            <a class="nav-link" href="/apikey">API Keys</a>
         </div>
         <div class="nav-right">
+            <button id="btn-notify" class="icon-btn" style="margin-right: 1rem;">🔔</button>
             <a href="/login" class="nav-btn outline" style="margin-right: 1rem;">Login</a>
             <a href="/dashboard" class="nav-btn">Get Started</a>
         </div>
@@ -247,6 +249,28 @@
             </p>
         </footer>
     </div>
+    <div id="notify-panel" class="hidden" style="position: fixed; top: 80px; right: 2rem; padding: 1rem 1.25rem; border-radius: 1rem; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(20px); border: 1px solid var(--border); z-index: 10000; width: 320px;">
+        <div style="font-weight: 700; margin-bottom: 0.75rem;">Notifications</div>
+        <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.75rem;">
+            <li style="display:flex; gap:0.5rem; align-items:center;"><span>✅</span><span>System healthy</span></li>
+            <li style="display:flex; gap:0.5rem; align-items:center;"><span>📬</span><span>Inbox ready</span></li>
+            <li style="display:flex; gap:0.5rem; align-items:center;"><span>🔐</span><span>API available</span></li>
+        </ul>
+    </div>
+    <script>
+        (function(){
+            var b=document.getElementById('btn-notify');
+            var p=document.getElementById('notify-panel');
+            if(!b||!p) return;
+            b.onclick=function(){
+                p.classList.toggle('hidden');
+            };
+            document.addEventListener('click',function(e){
+                if(e.target===b||p.contains(e.target)) return;
+                p.classList.add('hidden');
+            });
+        })();
+    </script>
 </body>
 
 </html>

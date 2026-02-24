@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Keys | Temp Mail</title>
+  <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="icon" href="/static/img/logo.png" type="image/png" />
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-left">
+      <a class="brand" href="/">
+        <img src="/static/img/logo.png" alt="Temp Mail" style="height: 40px;">
+      </a>
+      <a class="nav-link" href="/">Home</a>
+      <a class="nav-link" href="/dashboard">Dashboard</a>
+      <a class="nav-link" href="/api">API Docs</a>
+      <a class="nav-link" href="/apikey">API Keys</a>
+    </div>
+    <div class="nav-right">
+      <a href="/login" class="nav-btn outline" style="margin-right: 1rem;">Login</a>
+      <a href="/dashboard" class="nav-btn">Open App</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <section class="hero" style="text-align: center;">
+      <div class="hero-title">Developer Access</div>
+      <h1 style="margin-bottom: 1.5rem;">Manage API Keys</h1>
+      <p style="color: var(--text-muted); max-width: 800px; margin: 0 auto;">
+        Generate secure API keys to integrate Temp Mail into your applications. Limit: 2 keys per day for paid plans.
+      </p>
+    </section>
+
+    <div class="section" style="max-width: 720px; margin: 0 auto; padding: 3rem;">
+      <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Create API Key</h2>
+      <p style="color: var(--text-muted); margin-bottom: 1.5rem;">You must be logged in and on a non-free plan.</p>
+      <div style="display:flex; gap: 1rem; align-items: center;">
+        <button id="btn-create-key" class="nav-btn" style="padding: 0.9rem 1.5rem;">Generate Key</button>
+        <button id="btn-copy-key" class="nav-btn outline" style="padding: 0.9rem 1.5rem;" disabled>Copy</button>
+      </div>
+      <div style="margin-top: 1.5rem;">
+        <label style="display:block; color: var(--text-muted); margin-bottom: 0.5rem;">Your API Key</label>
+        <input id="api-key-display" type="text" readonly placeholder="No key yet" style="width:100%; font-weight:700;" />
+      </div>
+      <div id="quota" style="margin-top: 1rem; color: var(--text-muted);"></div>
+      <div id="status-msg" style="margin-top: 1rem; font-weight: 600;"></div>
+    </div>
+  </div>
+
+  <script>
+    async function createKey() {
+      const status = document.getElementById('status-msg');
+      const input = document.getElementById('api-key-display');
+      const copyBtn = document.getElementById('btn-copy-key');
+      const quota = document.getElementById('quota');
+      status.textContent = 'Generating...';
+      try {
+        const res = await fetch('/apikey/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'same-origin'
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.error || 'Request failed');
+        input.value = data.api_key || '';
+        copyBtn.disabled = !input.value;
+        quota.textContent = `Used today: ${data.generated_today || 1} / ${data.limit || 2}`;
+        status.textContent = 'API key generated';
+      } catch (e) {
+        status.textContent = e.message;
+      }
+    }
+    document.getElementById('btn-create-key').onclick = createKey;
+    document.getElementById('btn-copy-key').onclick = () => {
+      const input = document.getElementById('api-key-display');
+      if (!input.value) return;
+      navigator.clipboard.writeText(input.value);
+    };
+  </script>
+</body>
+</html>

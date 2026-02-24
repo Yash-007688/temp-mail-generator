@@ -184,7 +184,8 @@ def me():
             "username": user["username"],
             "plan": user["plan"],
             "is_premium": bool(user["is_premium"]),
-            "preferences": user["preferences_json"]
+            "preferences": user["preferences_json"],
+            "api_key": user.get("api_key")
         }
     })
 
@@ -214,6 +215,10 @@ def update_settings():
 @app.route("/api", methods=["GET"])
 def api_docs():
     return render_template("api.html")
+
+@app.route("/apikey", methods=["GET"])
+def api_key_page():
+    return render_template("apikey.html")
 
 @app.route("/apikey/create", methods=["POST"])
 def create_api_key():
