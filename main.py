@@ -2,7 +2,9 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for, s
 from temp_mail_generator import TempMailGenerator
 import os
 import hashlib
-from db import init_db, create_user, find_user_by_username, find_user_by_id, update_user_preferences
+import secrets
+import datetime
+from db import init_db, create_user, find_user_by_username, find_user_by_id, update_user_preferences, update_user_api_key, update_user_api_key_with_quota
 
 
 app = Flask(__name__)
@@ -213,8 +215,31 @@ def update_settings():
 def api_docs():
     return render_template("api.html")
 
+@app.route("/apikey/create", methods=["POST"])
+def create_api_key():
+    uid = session.get("user_id")
+    if not uid:
+        return jsonify({"error": "login required"}), 401
+    user = find_user_by_id(int(uid))
+    if not user:
+        return jsonify({"error": "user not found"}), 404
+    if user["plan"] == "free":
+        return jsonify({"error": "₹99 Starter plan or higher required for API key"}), 403
+    today = datetime.date.today().isoformat()
+    last_date = user["api_key_last_generated_at"]
+    count = int(user["daily_api_key_count"] or 0)
+    if last_date == today and count >= 2:
+        return jsonify({"error": "daily limit reached", "limit": 2}), 429
+    if last_date != today:
+        count = 0
+    key = "tm_" + secrets.token_urlsafe(32)
+    count += 1
+    ok = update_user_api_key_with_quota(int(uid), key, today, count)
+    if not ok:
+        return jsonify({"error": "failed to generate api key"}), 500
+    return jsonify({"api_key": key, "generated_today": count, "limit": 2})
+
 
 if __name__ == "__main__":
     # Run the development server: python main.py
     app.run(host="0.0.0.0", port=5000, debug=True)
-

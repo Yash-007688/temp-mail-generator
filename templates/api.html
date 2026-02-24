@@ -5,11 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>API Documentation | Temp Mail</title>
   <link rel="stylesheet" href="/static/css/style.css" />
+  <link rel="icon" href="/static/img/logo.png" type="image/png" />
 </head>
 <body>
   <nav class="navbar">
     <div class="nav-left">
-      <a class="brand" href="/">Temp Mail</a>
+      <a class="brand" href="/">
+        <img src="/static/img/logo.png" alt="Temp Mail" style="height: 40px;">
+      </a>
       <a class="nav-link" href="/">Home</a>
       <a class="nav-link" href="/#features">Features</a>
       <a class="nav-link" href="/#pricing">Pricing</a>
@@ -170,6 +173,22 @@ Errors:
 401 login required
 404 user not found
 403 ₹99 Starter plan or higher required to save settings</code></pre>
+    </section>
+
+    <section class="section">
+      <h2 style="margin-bottom:1rem">API Keys</h2>
+      <p style="color:var(--text-muted)">Requires login and non-free plan.</p>
+      <h3 style="margin:1.5rem 0 .75rem">Create API Key</h3>
+      <pre><code>POST /apikey/create
+Response 200:
+{ "api_key": "tm_xxx...", "generated_today": 1, "limit": 2 }
+
+Errors:
+401 login required
+404 user not found
+403 ₹99 Starter plan or higher required for API key
+429 daily limit reached (limit = 2)
+</code></pre>
     </section>
 
     <section class="section">
