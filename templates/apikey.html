@@ -28,9 +28,7 @@
     <section class="hero" style="text-align: center;">
       <div class="hero-title">Developer Access</div>
       <h1 style="margin-bottom: 1.5rem;">Manage API Keys</h1>
-      <p style="color: var(--text-muted); max-width: 800px; margin: 0 auto;">
-        Generate secure API keys to integrate Temp Mail into your applications. Limit: 2 keys per day for paid plans.
-      </p>
+      <p id="user-status" style="color: var(--text-muted); max-width: 800px; margin: 0 auto;"></p>
     </section>
 
     <div class="section" style="max-width: 720px; margin: 0 auto; padding: 3rem;">
@@ -78,6 +76,19 @@
       if (!input.value) return;
       navigator.clipboard.writeText(input.value);
     };
+    (async function(){
+      const status = document.getElementById('user-status');
+      const btn = document.getElementById('btn-create-key');
+      try{
+        const r = await fetch('/me', { credentials: 'same-origin' });
+        const d = await r.json().catch(()=>({}));
+        if(!d.user){ status.textContent = 'Login required to generate API keys.'; btn.disabled = true; return; }
+        status.textContent = `Logged in as ${d.user.username} • Plan: ${d.user.plan}`;
+        if(d.user.plan==='free'){ btn.disabled = true; status.textContent += ' • Upgrade required'; }
+      }catch(e){
+        status.textContent = 'Status unavailable';
+      }
+    })();
   </script>
 </body>
 </html>

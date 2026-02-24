@@ -166,6 +166,14 @@ body::before {
   box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
 }
 
+.hidden {
+  display: none !important;
+}
+
+.navbar .icon-btn {
+  margin-left: 0.75rem;
+}
+
 .social-icons {
   display: flex;
   gap: 1rem;

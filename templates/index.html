@@ -81,6 +81,48 @@
         </div>
     </div>
 
+    <div class="container">
+        <section class="section" style="margin: 4rem 0;">
+            <div style="text-align: center; margin-bottom: 2rem;">
+                <h2 style="font-size: 2.5rem; font-weight: 800;">Trusted Voices</h2>
+                <p style="font-size: 1.1rem; color: var(--text-muted);">Real feedback from privacy-focused users</p>
+            </div>
+            <div class="grid-container" style="gap: 2rem;">
+                <div class="card" style="display: flex; align-items: center; gap: 1.25rem;">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #6366f1, #a855f7); display:flex; align-items:center; justify-content:center; font-weight:800;">D</div>
+                    <div style="flex:1;">
+                        <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <div>
+                                <div style="font-weight:700;">Domie</div>
+                                <div style="color: var(--text-muted); font-size: 0.9rem;">Creator & Security Enthusiast</div>
+                            </div>
+                            <div style="color: var(--primary); font-weight:700;">★★★★★</div>
+                        </div>
+                        <p style="margin-top: 0.75rem; color: var(--text-main); line-height: 1.6;">
+                            “Temp Mail ne mere workflows ko simplify kar diya. Random aur custom identities bilkul frictionless hain.
+                            API integration bhi clean aur reliable hai.”
+                        </p>
+                    </div>
+                </div>
+                <div class="card" style="display: flex; align-items: center; gap: 1.25rem;">
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #22c55e, #06b6d4); display:flex; align-items:center; justify-content:center; font-weight:800;">A</div>
+                    <div style="flex:1;">
+                        <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <div>
+                                <div style="font-weight:700;">Aarav</div>
+                                <div style="color: var(--text-muted); font-size: 0.9rem;">App Developer</div>
+                            </div>
+                            <div style="color: var(--primary); font-weight:700;">★★★★★</div>
+                        </div>
+                        <p style="margin-top: 0.75rem; color: var(--text-main); line-height: 1.6;">
+                            “Onboarding fast tha, aur premium domains ki list impressive hai. Inbox export feature ne QA automate karne me madad ki.”
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
     <!-- Pricing Section -->
     <div id="pricing" style="background: rgba(0,0,0,0.2); padding: 8rem 1.5rem;">
         <div class="container">
@@ -262,9 +304,17 @@
             var b=document.getElementById('btn-notify');
             var p=document.getElementById('notify-panel');
             if(!b||!p) return;
+            function place(){
+                var r=b.getBoundingClientRect();
+                p.style.top=(window.scrollY+r.bottom+8)+'px';
+                p.style.right=(window.innerWidth-r.right)+'px';
+            }
             b.onclick=function(){
+                place();
                 p.classList.toggle('hidden');
             };
+            window.addEventListener('resize',function(){ if(!p.classList.contains('hidden')) place(); });
+            document.addEventListener('keydown',function(e){ if(e.key==='Escape') p.classList.add('hidden'); });
             document.addEventListener('click',function(e){
                 if(e.target===b||p.contains(e.target)) return;
                 p.classList.add('hidden');
